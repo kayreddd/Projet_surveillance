@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Capteurs - Ralys</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .card { @apply bg-white p-6 rounded-xl shadow-lg border border-gray-100 mb-6; }
+        .btn-buzzer { @apply px-6 py-3 rounded-full font-bold transition-all active:scale-95; }
+        
+        /* Correction du survol : pas de grisé, juste une bordure */
+        .photo-grid-item { 
+            @apply relative overflow-hidden rounded-lg bg-gray-200 aspect-video shadow-sm transition-all duration-200 border-2 border-transparent; 
+        }
+        .photo-grid-item:hover { 
+            @apply scale-105 z-10 shadow-xl border-indigo-500; 
+        }
+        
+        header { position: sticky; top: 0; z-index: 50; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans">
+
+    <header class="bg-indigo-600 text-white p-6 shadow-md">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold tracking-tight">Système de Surveillance IoT</h1>
+            <div id="status" class="flex items-center gap-2 text-sm bg-indigo-500 px-3 py-1 rounded-full">
+                <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span> Serveur Connecté
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+
+        <section class="card flex flex-col md:flex-row items-center justify-between gap-4 mt-4">
+            <div>
+                <h2 class="text-xl font-bold text-gray-700">Contrôle du Buzzer</h2>
+                <p class="text-gray-500 text-sm">Déclenchement manuel à distance</p>
+            </div>
+            <div class="flex gap-4">
+                <button onclick="controlBuzzer(1)" class="btn-buzzer bg-red-500 text-white hover:bg-red-600 shadow-red-200 shadow-lg">ACTIVER</button>
+                <button onclick="controlBuzzer(0)" class="btn-buzzer bg-gray-200 text-gray-700 hover:bg-gray-300">COUPER</button>
+            </div>
+        </section>
+
+        <section class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+            <div class="card text-center">
+                <p class="text-indigo-500 font-semibold uppercase text-xs">Température</p>
+                <p id="val-temperature" class="text-4xl font-black my-2">--°C</p>
+                <p id="date-temperature" class="text-gray-400 text-xs mt-2 italic"></p>
+            </div>
+            <div class="card text-center">
+                <p class="text-blue-500 font-semibold uppercase text-xs">Humidité</p>
+                <p id="val-humidity" class="text-4xl font-black my-2">--%</p>
+                <p id="date-humidity" class="text-gray-400 text-xs mt-2 italic"></p>
+            </div>
+            <div class="card text-center border-l-4 border-l-orange-400">
+                <p class="text-orange-500 font-semibold uppercase text-xs">Distance</p>
+                <p id="val-distance" class="text-4xl font-black my-2">-- cm</p>
+                <p id="date-distance" class="text-gray-400 text-xs mt-2 italic"></p>
+            </div>
+            <div class="card text-center border-l-4 border-l-yellow-400">
+                <p class="text-yellow-500 font-semibold uppercase text-xs">Luminosité</p>
+                <p id="val-lux" class="text-4xl font-black my-2">--%</p>
+                <p id="date-lux" class="text-gray-400 text-xs mt-2 italic"></p>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2 class="text-lg font-bold mb-4 text-indigo-700">Historique Température</h2>
+            <div style="position: relative; height:300px; width:100%">
+                <canvas id="tempChart"></canvas>
+            </div>
+        </section>
+
+        <section class="card">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold text-indigo-700">Flux Caméra : 10 dernières captures</h2>
+                <span class="text-xs font-mono text-gray-400 bg-gray-100 px-2 py-1 rounded">Auto-refresh 5s</span>
+            </div>
+            <div id="photo-gallery" class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                <p class="col-span-full text-center py-10 text-gray-400 italic">Chargement des images...</p>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        const API_BASE = "http://10.160.24.214:8000";
+
+        // Initialisation Chart.js
+        const ctx = document.getElementById('tempChart').getContext('2d');
+        let tempChart = new Chart(ctx, {
+            type: 'line',
+            data: { 
+                labels: [], 
+                datasets: [{ 
+                    label: 'Température (°C)', 
+                    borderColor: '#6366f1', 
+                    data: [], 
+                    tension: 0.3, 
+                    fill: true, 
+                    backgroundColor: 'rgba(99, 102, 241, 0.1)' 
+                }] 
+            },
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false,
+                scales: { y: { beginAtZero: false } } 
+            }
+        });
+
+        async function refreshData() {
+            try {
+                const response = await fetch(`${API_BASE}/capteurs/complet`);
+                const data = await response.json();
+                data.forEach(c => {
+                    const valEl = document.getElementById(`val-${c.nom}`);
+                    const dateEl = document.getElementById(`date-${c.nom}`);
+                    if (valEl) {
+                        if (c.nom === 'temperature') valEl.innerText = `${c.valeur}°C`;
+                        else if (c.nom === 'humidity') valEl.innerText = `${c.valeur}%`;
+                        else if (c.nom === 'distance') valEl.innerText = `${c.valeur} cm`;
+                        else if (c.nom === 'lux') valEl.innerText = `${c.valeur}%`;
+                    }
+                    if (dateEl) dateEl.innerText = `Le ${c.date.split(' ')[1]}`;
+                });
+            } catch (e) { 
+                console.error("Erreur data:", e);
+                document.getElementById('status').innerHTML = '<span class="w-2 h-2 bg-red-500 rounded-full"></span> Erreur API';
+            }
+        }
+
+        async function refreshPhotos() {
+            try {
+                const resPhoto = await fetch(`${API_BASE}/photos`);
+                const dataPhoto = await resPhoto.json();
+                const gallery = document.getElementById('photo-gallery');
+                
+                if (dataPhoto.photos && dataPhoto.photos.length > 0) {
+                    const last10 = dataPhoto.photos.slice(0, 10);
+                    gallery.innerHTML = last10.map((photo) => {
+                        const timeStr = photo.split('_')[1]?.replace(/-/g, ':').replace('.jpg', '') || '';
+                        return `
+                            <div class="photo-grid-item">
+                                <img src="${API_BASE}/static/${photo}" class="w-full h-full object-cover">
+                                <div class="absolute bottom-0 right-0 bg-black/60 px-2 py-0.5 rounded-tl-lg">
+                                    <span class="text-[9px] text-white font-mono">${timeStr}</span>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                }
+            } catch (e) { console.error("Erreur photos:", e); }
+        }
+
+        async function updateChart() {
+            try {
+                const response = await fetch(`${API_BASE}/historique/temperature?limit=15`);
+                const data = await response.json();
+                const cleanData = data.reverse();
+                tempChart.data.labels = cleanData.map(d => d.date.split(' ')[1]);
+                tempChart.data.datasets[0].data = cleanData.map(d => d.valeur);
+                tempChart.update();
+            } catch (e) { console.error("Erreur Graphique:", e); }
+        }
+
+        async function controlBuzzer(etat) {
+            try {
+                await fetch(`${API_BASE}/action/buzzer/${etat}`, { method: 'POST' });
+            } catch (e) { alert("Erreur communication buzzer"); }
+        }
+
+        // Rafraîchissements
+        setInterval(refreshData, 5000);
+        setInterval(refreshPhotos, 5000);
+        setInterval(updateChart, 60000);
+
+        // Init
+        refreshData();
+        refreshPhotos();
+        updateChart();
+    </script>
+</body>
+</html>
