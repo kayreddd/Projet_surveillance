@@ -41,8 +41,10 @@ void callback(char* topic, byte* payload, unsigned int length) {
   if (String(topic) == "arduino/commande/buzzer") {
     if (message == '1') {
       digitalWrite(BUZZER_PIN, HIGH);
+      Serial.println("Buzzer ON");
     } else if (message == '0') {
       digitalWrite(BUZZER_PIN, LOW);
+      Serial.println("Buzzer OFF");
     }
   }
 }
@@ -125,7 +127,7 @@ void loop() {
     sprintf(lStr, "%d", luxPercent);
     client.publish("arduino/capteurs/lux", lStr);
     
-    Serial.print("Temp: "); Serial.print(t);
+    Serial.print(" Temp: "); Serial.print(t);
     Serial.print(" Hum: "); Serial.print(h);
     Serial.print(" Lux: "); Serial.println(luxPercent);
   }
