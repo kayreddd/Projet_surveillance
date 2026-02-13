@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Capteurs</title>
+    <title>Dashboard Projet Surveillance</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -117,16 +117,12 @@
             bottom: 12px;
             width: 3px;
             border-radius: 0 3px 3px 0;
-            background: #ccc;
+            background: #d32f2f;
             transition: background 0.3s;
         }
 
         .buzzer-section.active::before {
-            background: #d32f2f;
-        }
-
-        .buzzer-section.inactive::before {
-            background: #34c759;
+            background: #34c759
         }
 
         .buzzer-info {
@@ -146,44 +142,6 @@
             color: #888;
         }
 
-        .buzzer-status {
-            display: flex;
-            align-items: center;
-            gap: 7px;
-            font-size: 0.78rem;
-            font-weight: 600;
-            padding: 5px 14px;
-            border-radius: 6px;
-            transition: all 0.3s;
-        }
-
-        .buzzer-status.on {
-            background: #fdecea;
-            color: #d32f2f;
-            border: 1px solid #f5c6cb;
-        }
-
-        .buzzer-status.off {
-            background: #eaf7ec;
-            color: #2e7d32;
-            border: 1px solid #c8e6c9;
-        }
-
-        .buzzer-status-dot {
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-        }
-
-        .buzzer-status.on .buzzer-status-dot {
-            background: #d32f2f;
-            animation: blink 1.2s infinite;
-        }
-
-        .buzzer-status.off .buzzer-status-dot {
-            background: #34c759;
-        }
-
         @keyframes blink {
 
             0%,
@@ -196,64 +154,98 @@
             }
         }
 
-        .buzzer-controls {
+        /* Toggle switch */
+        .toggle-wrapper {
             display: flex;
-            gap: 10px;
             align-items: center;
+            gap: 12px;
         }
 
-        .btn-buzzer {
-            display: inline-flex;
+        .toggle-label {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: #d32f2f;
+            min-width: 28px;
+            transition: color 0.3s;
+        }
+
+        .toggle-label.is-on {
+            color: #2e7d32;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 52px;
+            height: 28px;
+            cursor: pointer;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            inset: 0;
+            background: #d32f2f;
+            border-radius: 28px;
+            transition: background 0.3s;
+        }
+
+        .toggle-slider::before {
+            content: '';
+            position: absolute;
+            left: 3px;
+            top: 3px;
+            width: 22px;
+            height: 22px;
+            background: #fff;
+            border-radius: 50%;
+            transition: transform 0.3s;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+        }
+
+        .toggle-switch input:checked+.toggle-slider {
+            background: #34c759;
+        }
+
+        .toggle-switch input:checked+.toggle-slider::before {
+            transform: translateX(24px);
+        }
+
+        .toggle-status {
+            display: flex;
             align-items: center;
             gap: 7px;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             font-weight: 600;
-            font-family: inherit;
-            cursor: pointer;
-            border: 1px solid transparent;
-            transition: all 0.2s ease;
-        }
-
-        .btn-buzzer:active {
-            transform: scale(0.97);
-        }
-
-        .btn-activate {
-            background: #d32f2f;
-            color: #fff;
-            border-color: #d32f2f;
-        }
-
-        .btn-activate:hover {
-            background: #b71c1c;
-        }
-
-        .btn-activate.is-active {
-            background: #fff;
+            padding: 5px 14px;
+            border-radius: 6px;
+            transition: all 0.3s;
+            background: #fdecea;
             color: #d32f2f;
-            border-color: #e0e0e0;
+            border: 1px solid #f5c6cb;
         }
 
-        .btn-deactivate {
-            background: #fff;
-            color: #555;
-            border-color: #ddd;
+        .toggle-status.is-on {
+            background: #eaf7ec;
+            color: #2e7d32;
+            border-color: #c8e6c9;
         }
 
-        .btn-deactivate:hover {
-            background: #f5f5f5;
+        .toggle-status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #d32f2f;
+            animation: blink 1.2s infinite;
         }
 
-        .btn-deactivate.is-active {
+        .toggle-status.is-on .toggle-status-dot {
             background: #34c759;
-            color: #fff;
-            border-color: #34c759;
-        }
-
-        .btn-deactivate.is-active:hover {
-            background: #2ea44f;
+            animation: none;
         }
 
         /* ── Sensor cards ────────────────────────────── */
@@ -403,6 +395,73 @@
             font-size: 0.85rem;
         }
 
+        /* ── Charts grid ─────────────────────────────── */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.25rem;
+            margin-bottom: 1.25rem;
+        }
+
+        @media (max-width: 768px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ── Movement log ────────────────────────────── */
+        .movement-log {
+            max-height: 320px;
+            overflow-y: auto;
+        }
+
+        .movement-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+        }
+
+        .movement-table th {
+            text-align: left;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #888;
+            padding: 8px 12px;
+            border-bottom: 2px solid #eee;
+            position: sticky;
+            top: 0;
+            background: #fff;
+        }
+
+        .movement-table td {
+            padding: 8px 12px;
+            color: #333;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .movement-table tr:hover td {
+            background: #fafafa;
+        }
+
+        .movement-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #f97316;
+            margin-right: 6px;
+            vertical-align: middle;
+        }
+
+        .movement-empty {
+            text-align: center;
+            padding: 2rem;
+            color: #bbb;
+            font-size: 0.85rem;
+        }
+
         /* ── Footer ──────────────────────────────────── */
         footer {
             text-align: center;
@@ -469,13 +528,15 @@
                 <div class="buzzer-subtitle">Alarme sonore — déclenchement à distance</div>
             </div>
 
-            <div class="buzzer-controls">
-                <button id="btn-on" onclick="controlBuzzer(1)" class="btn-buzzer btn-activate">
-                    Déclencher l'alarme
-                </button>
-                <button id="btn-off" onclick="controlBuzzer(0)" class="btn-buzzer btn-deactivate">
-                    Couper l'alarme
-                </button>
+            <div class="toggle-wrapper">
+                <div id="toggle-status" class="toggle-status">
+                    <div class="toggle-status-dot"></div>
+                    <span id="toggle-status-text">OFF</span>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="alarm-toggle" onchange="toggleAlarm(this)">
+                    <span class="toggle-slider"></span>
+                </label>
             </div>
         </section>
 
@@ -515,11 +576,50 @@
             </div>
         </div>
 
-        <!-- CHART -->
+        <!-- CHARTS -->
         <section class="card">
             <div class="section-label">Historique Température</div>
             <div style="position: relative; height: 280px; width: 100%;">
                 <canvas id="tempChart"></canvas>
+            </div>
+        </section>
+
+        <div class="charts-grid">
+            <section class="card" style="margin-bottom: 0;">
+                <div class="section-label">Historique Humidité</div>
+                <div style="position: relative; height: 240px; width: 100%;">
+                    <canvas id="humidChart"></canvas>
+                </div>
+            </section>
+            <section class="card" style="margin-bottom: 0;">
+                <div class="section-label">Historique Luminosité</div>
+                <div style="position: relative; height: 240px; width: 100%;">
+                    <canvas id="luxChart"></canvas>
+                </div>
+            </section>
+        </div>
+
+        <!-- MOVEMENT LOG -->
+        <section class="card">
+            <div class="section-header">
+                <div class="section-label" style="margin-bottom:0">Détections de mouvement</div>
+                <span class="badge">Auto-refresh 5s</span>
+            </div>
+            <div class="movement-log">
+                <table class="movement-table">
+                    <thead>
+                        <tr>
+                            <th>Heure</th>
+                            <th>Distance</th>
+                            <th>Variation</th>
+                        </tr>
+                    </thead>
+                    <tbody id="movement-body">
+                        <tr>
+                            <td colspan="3" class="movement-empty">Chargement…</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </section>
 
@@ -544,76 +644,82 @@
         const API_BASE = window.location.origin;
         let buzzerState = null;
 
-        // Chart.js
-        const ctx = document.getElementById('tempChart').getContext('2d');
-        const gradient = ctx.createLinearGradient(0, 0, 0, 280);
-        gradient.addColorStop(0, 'rgba(99, 102, 241, 0.12)');
-        gradient.addColorStop(1, 'rgba(99, 102, 241, 0)');
-
-        let tempChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: [],
-                datasets: [{
-                    label: 'Température (°C)',
-                    borderColor: '#6366f1',
-                    pointBackgroundColor: '#6366f1',
-                    pointBorderColor: '#fff',
-                    pointBorderWidth: 2,
-                    pointRadius: 3,
-                    pointHoverRadius: 5,
-                    data: [],
-                    tension: 0.35,
-                    fill: true,
-                    backgroundColor: gradient,
-                    borderWidth: 2
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        backgroundColor: '#333',
-                        titleColor: '#fff',
-                        bodyColor: '#ccc',
-                        padding: 10,
-                        cornerRadius: 6,
-                        displayColors: false
-                    }
+        // ── Helper: create a chart ──────────────────
+        function createChart(canvasId, label, color, height) {
+            const c = document.getElementById(canvasId).getContext('2d');
+            const g = c.createLinearGradient(0, 0, 0, height || 280);
+            g.addColorStop(0, color.replace('1)', '0.12)'));
+            g.addColorStop(1, color.replace('1)', '0)'));
+            return new Chart(c, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: label,
+                        borderColor: color,
+                        pointBackgroundColor: color,
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 3,
+                        pointHoverRadius: 5,
+                        data: [],
+                        tension: 0.35,
+                        fill: true,
+                        backgroundColor: g,
+                        borderWidth: 2
+                    }]
                 },
-                scales: {
-                    x: {
-                        grid: { color: 'rgba(0,0,0,0.04)' },
-                        ticks: { color: '#999', font: { size: 11, family: 'DM Sans' } }
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#333',
+                            titleColor: '#fff',
+                            bodyColor: '#ccc',
+                            padding: 10,
+                            cornerRadius: 6,
+                            displayColors: false
+                        }
                     },
-                    y: {
-                        beginAtZero: false,
-                        grid: { color: 'rgba(0,0,0,0.04)' },
-                        ticks: { color: '#999', font: { size: 11, family: 'DM Sans' } }
+                    scales: {
+                        x: {
+                            grid: { color: 'rgba(0,0,0,0.04)' },
+                            ticks: { color: '#999', font: { size: 11, family: 'DM Sans' } }
+                        },
+                        y: {
+                            beginAtZero: false,
+                            grid: { color: 'rgba(0,0,0,0.04)' },
+                            ticks: { color: '#999', font: { size: 11, family: 'DM Sans' } }
+                        }
                     }
                 }
-            }
-        });
+            });
+        }
+
+        // ── Charts ──────────────────────────────────
+        let tempChart = createChart('tempChart', 'Température (°C)', 'rgba(99, 102, 241, 1)', 280);
+        let humidChart = createChart('humidChart', 'Humidité (%)', 'rgba(59, 130, 246, 1)', 240);
+        let luxChart = createChart('luxChart', 'Luminosité (%)', 'rgba(234, 179, 8, 1)', 240);
 
         // Buzzer UI
         function updateBuzzerUI(state) {
             buzzerState = state;
             const section = document.getElementById('buzzer-section');
-            const btnOn = document.getElementById('btn-on');
-            const btnOff = document.getElementById('btn-off');
+            const toggle = document.getElementById('alarm-toggle');
+            const status = document.getElementById('toggle-status');
+            const statusText = document.getElementById('toggle-status-text');
 
-            section.classList.remove('active', 'inactive');
-            btnOn.classList.remove('is-active');
-            btnOff.classList.remove('is-active');
+            toggle.checked = state === 1;
+            section.classList.toggle('active', state === 1);
 
             if (state === 1) {
-                section.classList.add('active');
-                btnOn.classList.add('is-active');
+                status.classList.add('is-on');
+                statusText.textContent = 'ON';
             } else {
-                section.classList.add('inactive');
-                btnOff.classList.add('is-active');
+                status.classList.remove('is-on');
+                statusText.textContent = 'OFF';
             }
         }
 
@@ -663,25 +769,57 @@
             } catch (e) { console.error("Erreur photos:", e); }
         }
 
-        // Chart
-        async function updateChart() {
+        // Charts
+        async function updateChartData(chart, endpoint) {
             try {
-                const response = await fetch(`${API_BASE}/historique/temperature?limit=15`);
+                const response = await fetch(`${API_BASE}/historique/${endpoint}?limit=15`);
                 const data = await response.json();
                 const cleanData = data.reverse();
-                tempChart.data.labels = cleanData.map(d => d.date.split(' ')[1]);
-                tempChart.data.datasets[0].data = cleanData.map(d => d.valeur);
-                tempChart.update();
-            } catch (e) { console.error("Erreur Graphique:", e); }
+                chart.data.labels = cleanData.map(d => d.date.split(' ')[1]);
+                chart.data.datasets[0].data = cleanData.map(d => d.valeur);
+                chart.update();
+            } catch (e) { console.error(`Erreur graphique ${endpoint}:`, e); }
+        }
+
+        async function updateAllCharts() {
+            updateChartData(tempChart, 'temperature');
+            updateChartData(humidChart, 'humidity');
+            updateChartData(luxChart, 'lux');
+        }
+
+        // Movement log
+        async function refreshMovements() {
+            try {
+                const response = await fetch(`${API_BASE}/historique/distance?limit=20`);
+                const data = await response.json();
+                const body = document.getElementById('movement-body');
+                if (data && data.length > 0) {
+                    body.innerHTML = data.map((d, i) => {
+                        const time = d.date.split(' ')[1] || d.date;
+                        const prev = data[i + 1];
+                        const variation = prev ? (d.valeur - prev.valeur) : 0;
+                        const sign = variation >= 0 ? '+' : '';
+                        return `<tr>
+                            <td><span class="movement-dot"></span>${time}</td>
+                            <td>${d.valeur} cm</td>
+                            <td>${sign}${variation.toFixed(1)} cm</td>
+                        </tr>`;
+                    }).join('');
+                } else {
+                    body.innerHTML = '<tr><td colspan="3" class="movement-empty">Aucun mouvement détecté</td></tr>';
+                }
+            } catch (e) { console.error('Erreur mouvements:', e); }
         }
 
         // Buzzer
-        async function controlBuzzer(etat) {
+        async function toggleAlarm(checkbox) {
+            const etat = checkbox.checked ? 1 : 0;
             try {
                 await fetch(`${API_BASE}/action/buzzer/${etat}`, { method: 'POST' });
                 updateBuzzerUI(etat);
             } catch (e) {
                 alert("Erreur de communication avec le buzzer");
+                checkbox.checked = !checkbox.checked; // revert on error
             }
         }
 
@@ -689,11 +827,13 @@
         updateBuzzerUI(0);
         refreshData();
         refreshPhotos();
-        updateChart();
+        updateAllCharts();
+        refreshMovements();
 
         setInterval(refreshData, 5000);
         setInterval(refreshPhotos, 5000);
-        setInterval(updateChart, 60000);
+        setInterval(updateAllCharts, 60000);
+        setInterval(refreshMovements, 5000);
     </script>
 </body>
 
