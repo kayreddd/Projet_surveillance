@@ -12,7 +12,7 @@ DHT dht(DHTPIN, DHTTYPE);
 
 #define ULTRASON_PIN 3 
 #define BUZZER_PIN 4      
-#define LDR_PIN A1          // Broche pour le capteur de luminosité
+#define LDR_PIN A1
 #define SEUIL_MOUVEMENT 5 
 
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
@@ -41,10 +41,8 @@ void callback(char* topic, byte* payload, unsigned int length) {
   if (String(topic) == "arduino/commande/buzzer") {
     if (message == '1') {
       digitalWrite(BUZZER_PIN, HIGH);
-      Serial.println("Buzzer ON");
     } else if (message == '0') {
       digitalWrite(BUZZER_PIN, LOW);
-      Serial.println("Buzzer OFF");
     }
   }
 }

@@ -1,117 +1,623 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Capteurs - Ralys</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Dashboard Capteurs</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        .card { @apply bg-white p-6 rounded-xl shadow-lg border border-gray-100 mb-6; }
-        .btn-buzzer { @apply px-6 py-3 rounded-full font-bold transition-all active:scale-95; }
-        
-        /* Correction du survol : pas de grisé, juste une bordure */
-        .photo-grid-item { 
-            @apply relative overflow-hidden rounded-lg bg-gray-200 aspect-video shadow-sm transition-all duration-200 border-2 border-transparent; 
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
-        .photo-grid-item:hover { 
-            @apply scale-105 z-10 shadow-xl border-indigo-500; 
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: #ffffff;
+            color: #1a1a1a;
+            min-height: 100vh;
+            line-height: 1.5;
         }
-        
-        header { position: sticky; top: 0; z-index: 50; }
+
+        /* ── Header ─────────────────────────────────── */
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: #1e293b;
+            border-bottom: 1px solid #334155;
+            padding: 0.9rem 2rem;
+        }
+
+        .header-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-inner h1 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: -0.01em;
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #cbd5e1;
+            padding: 5px 12px;
+            border-radius: 6px;
+            border: 1px solid #334155;
+            background: rgba(255, 255, 255, 0.07);
+        }
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #34c759;
+        }
+
+        .status-badge.error {
+            color: #d32f2f;
+        }
+
+        .status-badge.error .status-dot {
+            background: #d32f2f;
+        }
+
+        /* ── Main ───────────────────────────────────── */
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1.75rem 1.5rem 3rem;
+        }
+
+        /* ── Card ────────────────────────────────────── */
+        .card {
+            background: #fff;
+            border: 1px solid #e8e8e8;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1.25rem;
+        }
+
+        /* ── BUZZER ──────────────────────────────────── */
+        .buzzer-section {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1.25rem;
+            background: #fff;
+            border: 1px solid #e8e8e8;
+            border-radius: 10px;
+            padding: 1.5rem 1.75rem;
+            margin-bottom: 1.25rem;
+            position: relative;
+        }
+
+        .buzzer-section::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 12px;
+            bottom: 12px;
+            width: 3px;
+            border-radius: 0 3px 3px 0;
+            background: #ccc;
+            transition: background 0.3s;
+        }
+
+        .buzzer-section.active::before {
+            background: #d32f2f;
+        }
+
+        .buzzer-section.inactive::before {
+            background: #34c759;
+        }
+
+        .buzzer-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .buzzer-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+
+        .buzzer-subtitle {
+            font-size: 0.78rem;
+            color: #888;
+        }
+
+        .buzzer-status {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            padding: 5px 14px;
+            border-radius: 6px;
+            transition: all 0.3s;
+        }
+
+        .buzzer-status.on {
+            background: #fdecea;
+            color: #d32f2f;
+            border: 1px solid #f5c6cb;
+        }
+
+        .buzzer-status.off {
+            background: #eaf7ec;
+            color: #2e7d32;
+            border: 1px solid #c8e6c9;
+        }
+
+        .buzzer-status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+        }
+
+        .buzzer-status.on .buzzer-status-dot {
+            background: #d32f2f;
+            animation: blink 1.2s infinite;
+        }
+
+        .buzzer-status.off .buzzer-status-dot {
+            background: #34c759;
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.3;
+            }
+        }
+
+        .buzzer-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .btn-buzzer {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .btn-buzzer:active {
+            transform: scale(0.97);
+        }
+
+        .btn-activate {
+            background: #d32f2f;
+            color: #fff;
+            border-color: #d32f2f;
+        }
+
+        .btn-activate:hover {
+            background: #b71c1c;
+        }
+
+        .btn-activate.is-active {
+            background: #fff;
+            color: #d32f2f;
+            border-color: #e0e0e0;
+        }
+
+        .btn-deactivate {
+            background: #fff;
+            color: #555;
+            border-color: #ddd;
+        }
+
+        .btn-deactivate:hover {
+            background: #f5f5f5;
+        }
+
+        .btn-deactivate.is-active {
+            background: #34c759;
+            color: #fff;
+            border-color: #34c759;
+        }
+
+        .btn-deactivate.is-active:hover {
+            background: #2ea44f;
+        }
+
+        /* ── Sensor cards ────────────────────────────── */
+        .sensor-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .sensor-card {
+            background: #fff;
+            border: 1px solid #e8e8e8;
+            border-radius: 10px;
+            padding: 1.25rem 1.5rem;
+            transition: box-shadow 0.2s;
+        }
+
+        .sensor-card:hover {
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+        }
+
+        .sensor-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+        }
+
+        .sensor-label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: #888;
+        }
+
+        .sensor-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .sensor-dot.temp {
+            background: #6366f1;
+        }
+
+        .sensor-dot.humid {
+            background: #3b82f6;
+        }
+
+        .sensor-dot.dist {
+            background: #f97316;
+        }
+
+        .sensor-dot.light {
+            background: #eab308;
+        }
+
+        .sensor-value {
+            font-size: 2.25rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: #1a1a1a;
+            margin: 0.15rem 0;
+        }
+
+        .sensor-date {
+            font-size: 0.7rem;
+            color: #aaa;
+        }
+
+        /* ── Chart ───────────────────────────────────── */
+        .section-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.75rem;
+        }
+
+        /* ── Camera ──────────────────────────────────── */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .badge {
+            font-size: 0.65rem;
+            font-weight: 500;
+            color: #aaa;
+            background: #f5f5f5;
+            padding: 4px 10px;
+            border-radius: 5px;
+            border: 1px solid #eee;
+        }
+
+        .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+        }
+
+        .photo-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 8px;
+            background: #f5f5f5;
+            aspect-ratio: 16/10;
+            border: 1px solid #e8e8e8;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .photo-item:hover {
+            transform: scale(1.03);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            z-index: 10;
+        }
+
+        .photo-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .photo-timestamp {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 2px 8px;
+            border-radius: 6px 0 0 0;
+            font-size: 0.6rem;
+            font-weight: 500;
+            color: #fff;
+        }
+
+        .photo-placeholder {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 3rem;
+            color: #bbb;
+            font-size: 0.85rem;
+        }
+
+        /* ── Footer ──────────────────────────────────── */
+        footer {
+            text-align: center;
+            padding: 1.5rem;
+            font-size: 0.7rem;
+            color: #bbb;
+            border-top: 1px solid #eee;
+        }
+
+        /* ── Responsive ──────────────────────────────── */
+        @media (max-width: 640px) {
+            header {
+                padding: 0.75rem 1rem;
+            }
+
+            main {
+                padding: 1rem;
+            }
+
+            .buzzer-section {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 1.25rem;
+            }
+
+            .buzzer-controls {
+                width: 100%;
+            }
+
+            .btn-buzzer {
+                flex: 1;
+                justify-content: center;
+            }
+
+            .sensor-value {
+                font-size: 1.75rem;
+            }
+
+            .photo-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
+        }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-800 font-sans">
 
-    <header class="bg-indigo-600 text-white p-6 shadow-md">
-        <div class="container mx-auto flex justify-between items-center">
-            <h1 class="text-2xl font-bold tracking-tight">Système de Surveillance IoT</h1>
-            <div id="status" class="flex items-center gap-2 text-sm bg-indigo-500 px-3 py-1 rounded-full">
-                <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span> Serveur Connecté
+<body>
+
+    <header>
+        <div class="header-inner">
+            <h1>Système de Surveillance IoT</h1>
+            <div id="status" class="status-badge">
+                <div class="status-dot"></div>
+                Serveur connecté
             </div>
         </div>
     </header>
 
-    <main class="container mx-auto p-4 md:p-8">
+    <main>
 
-        <section class="card flex flex-col md:flex-row items-center justify-between gap-4 mt-4">
-            <div>
-                <h2 class="text-xl font-bold text-gray-700">Contrôle du Buzzer</h2>
-                <p class="text-gray-500 text-sm">Déclenchement manuel à distance</p>
+        <!-- BUZZER -->
+        <section id="buzzer-section" class="buzzer-section">
+            <div class="buzzer-info">
+                <div class="buzzer-title">Contrôle du Buzzer</div>
+                <div class="buzzer-subtitle">Alarme sonore — déclenchement à distance</div>
             </div>
-            <div class="flex gap-4">
-                <button onclick="controlBuzzer(1)" class="btn-buzzer bg-red-500 text-white hover:bg-red-600 shadow-red-200 shadow-lg">ACTIVER</button>
-                <button onclick="controlBuzzer(0)" class="btn-buzzer bg-gray-200 text-gray-700 hover:bg-gray-300">COUPER</button>
+
+            <div class="buzzer-controls">
+                <button id="btn-on" onclick="controlBuzzer(1)" class="btn-buzzer btn-activate">
+                    Déclencher l'alarme
+                </button>
+                <button id="btn-off" onclick="controlBuzzer(0)" class="btn-buzzer btn-deactivate">
+                    Couper l'alarme
+                </button>
             </div>
         </section>
 
-        <section class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-            <div class="card text-center">
-                <p class="text-indigo-500 font-semibold uppercase text-xs">Température</p>
-                <p id="val-temperature" class="text-4xl font-black my-2">--°C</p>
-                <p id="date-temperature" class="text-gray-400 text-xs mt-2 italic"></p>
+        <!-- SENSORS -->
+        <div class="sensor-grid">
+            <div class="sensor-card">
+                <div class="sensor-header">
+                    <span class="sensor-label">Température</span>
+                    <div class="sensor-dot temp"></div>
+                </div>
+                <div id="val-temperature" class="sensor-value">--°C</div>
+                <div id="date-temperature" class="sensor-date"></div>
             </div>
-            <div class="card text-center">
-                <p class="text-blue-500 font-semibold uppercase text-xs">Humidité</p>
-                <p id="val-humidity" class="text-4xl font-black my-2">--%</p>
-                <p id="date-humidity" class="text-gray-400 text-xs mt-2 italic"></p>
+            <div class="sensor-card">
+                <div class="sensor-header">
+                    <span class="sensor-label">Humidité</span>
+                    <div class="sensor-dot humid"></div>
+                </div>
+                <div id="val-humidity" class="sensor-value">--%</div>
+                <div id="date-humidity" class="sensor-date"></div>
             </div>
-            <div class="card text-center border-l-4 border-l-orange-400">
-                <p class="text-orange-500 font-semibold uppercase text-xs">Distance</p>
-                <p id="val-distance" class="text-4xl font-black my-2">-- cm</p>
-                <p id="date-distance" class="text-gray-400 text-xs mt-2 italic"></p>
+            <div class="sensor-card">
+                <div class="sensor-header">
+                    <span class="sensor-label">Distance</span>
+                    <div class="sensor-dot dist"></div>
+                </div>
+                <div id="val-distance" class="sensor-value">-- cm</div>
+                <div id="date-distance" class="sensor-date"></div>
             </div>
-            <div class="card text-center border-l-4 border-l-yellow-400">
-                <p class="text-yellow-500 font-semibold uppercase text-xs">Luminosité</p>
-                <p id="val-lux" class="text-4xl font-black my-2">--%</p>
-                <p id="date-lux" class="text-gray-400 text-xs mt-2 italic"></p>
+            <div class="sensor-card">
+                <div class="sensor-header">
+                    <span class="sensor-label">Luminosité</span>
+                    <div class="sensor-dot light"></div>
+                </div>
+                <div id="val-lux" class="sensor-value">--%</div>
+                <div id="date-lux" class="sensor-date"></div>
             </div>
-        </section>
+        </div>
 
+        <!-- CHART -->
         <section class="card">
-            <h2 class="text-lg font-bold mb-4 text-indigo-700">Historique Température</h2>
-            <div style="position: relative; height:300px; width:100%">
+            <div class="section-label">Historique Température</div>
+            <div style="position: relative; height: 280px; width: 100%;">
                 <canvas id="tempChart"></canvas>
             </div>
         </section>
 
+        <!-- CAMERA -->
         <section class="card">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-xl font-bold text-indigo-700">Flux Caméra : 10 dernières captures</h2>
-                <span class="text-xs font-mono text-gray-400 bg-gray-100 px-2 py-1 rounded">Auto-refresh 5s</span>
+            <div class="section-header">
+                <div class="section-label" style="margin-bottom:0">10 dernières captures</div>
+                <span class="badge">Auto-refresh 5s</span>
             </div>
-            <div id="photo-gallery" class="grid grid-cols-2 md:grid-cols-5 gap-4">
-                <p class="col-span-full text-center py-10 text-gray-400 italic">Chargement des images...</p>
+            <div id="photo-gallery" class="photo-grid">
+                <p class="photo-placeholder">Chargement des images…</p>
             </div>
         </section>
 
     </main>
 
-    <script>
-        const API_BASE = "http://10.160.24.214:8000";
+    <footer>
+        Système de Surveillance IoT — Ralys, Mathias et Yanis &copy; 2026
+    </footer>
 
-        // Initialisation Chart.js
+    <script>
+        const API_BASE = window.location.origin;
+        let buzzerState = null;
+
+        // Chart.js
         const ctx = document.getElementById('tempChart').getContext('2d');
+        const gradient = ctx.createLinearGradient(0, 0, 0, 280);
+        gradient.addColorStop(0, 'rgba(99, 102, 241, 0.12)');
+        gradient.addColorStop(1, 'rgba(99, 102, 241, 0)');
+
         let tempChart = new Chart(ctx, {
             type: 'line',
-            data: { 
-                labels: [], 
-                datasets: [{ 
-                    label: 'Température (°C)', 
-                    borderColor: '#6366f1', 
-                    data: [], 
-                    tension: 0.3, 
-                    fill: true, 
-                    backgroundColor: 'rgba(99, 102, 241, 0.1)' 
-                }] 
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Température (°C)',
+                    borderColor: '#6366f1',
+                    pointBackgroundColor: '#6366f1',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 3,
+                    pointHoverRadius: 5,
+                    data: [],
+                    tension: 0.35,
+                    fill: true,
+                    backgroundColor: gradient,
+                    borderWidth: 2
+                }]
             },
-            options: { 
-                responsive: true, 
+            options: {
+                responsive: true,
                 maintainAspectRatio: false,
-                scales: { y: { beginAtZero: false } } 
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#333',
+                        titleColor: '#fff',
+                        bodyColor: '#ccc',
+                        padding: 10,
+                        cornerRadius: 6,
+                        displayColors: false
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { color: 'rgba(0,0,0,0.04)' },
+                        ticks: { color: '#999', font: { size: 11, family: 'DM Sans' } }
+                    },
+                    y: {
+                        beginAtZero: false,
+                        grid: { color: 'rgba(0,0,0,0.04)' },
+                        ticks: { color: '#999', font: { size: 11, family: 'DM Sans' } }
+                    }
+                }
             }
         });
 
+        // Buzzer UI
+        function updateBuzzerUI(state) {
+            buzzerState = state;
+            const section = document.getElementById('buzzer-section');
+            const btnOn = document.getElementById('btn-on');
+            const btnOff = document.getElementById('btn-off');
+
+            section.classList.remove('active', 'inactive');
+            btnOn.classList.remove('is-active');
+            btnOff.classList.remove('is-active');
+
+            if (state === 1) {
+                section.classList.add('active');
+                btnOn.classList.add('is-active');
+            } else {
+                section.classList.add('inactive');
+                btnOff.classList.add('is-active');
+            }
+        }
+
+        // Data
         async function refreshData() {
             try {
                 const response = await fetch(`${API_BASE}/capteurs/complet`);
@@ -120,35 +626,36 @@
                     const valEl = document.getElementById(`val-${c.nom}`);
                     const dateEl = document.getElementById(`date-${c.nom}`);
                     if (valEl) {
-                        if (c.nom === 'temperature') valEl.innerText = `${c.valeur}°C`;
-                        else if (c.nom === 'humidity') valEl.innerText = `${c.valeur}%`;
-                        else if (c.nom === 'distance') valEl.innerText = `${c.valeur} cm`;
-                        else if (c.nom === 'lux') valEl.innerText = `${c.valeur}%`;
+                        if (c.nom === 'temperature') valEl.textContent = `${c.valeur}°C`;
+                        else if (c.nom === 'humidity') valEl.textContent = `${c.valeur}%`;
+                        else if (c.nom === 'distance') valEl.textContent = `${c.valeur} cm`;
+                        else if (c.nom === 'lux') valEl.textContent = `${c.valeur}%`;
                     }
-                    if (dateEl) dateEl.innerText = `Le ${c.date.split(' ')[1]}`;
+                    if (dateEl) dateEl.textContent = `Mise à jour : ${c.date.split(' ')[1]}`;
                 });
-            } catch (e) { 
+            } catch (e) {
                 console.error("Erreur data:", e);
-                document.getElementById('status').innerHTML = '<span class="w-2 h-2 bg-red-500 rounded-full"></span> Erreur API';
+                const s = document.getElementById('status');
+                s.className = 'status-badge error';
+                s.innerHTML = '<div class="status-dot"></div> Erreur API';
             }
         }
 
+        // Photos
         async function refreshPhotos() {
             try {
                 const resPhoto = await fetch(`${API_BASE}/photos`);
                 const dataPhoto = await resPhoto.json();
                 const gallery = document.getElementById('photo-gallery');
-                
+
                 if (dataPhoto.photos && dataPhoto.photos.length > 0) {
                     const last10 = dataPhoto.photos.slice(0, 10);
                     gallery.innerHTML = last10.map((photo) => {
                         const timeStr = photo.split('_')[1]?.replace(/-/g, ':').replace('.jpg', '') || '';
                         return `
-                            <div class="photo-grid-item">
-                                <img src="${API_BASE}/static/${photo}" class="w-full h-full object-cover">
-                                <div class="absolute bottom-0 right-0 bg-black/60 px-2 py-0.5 rounded-tl-lg">
-                                    <span class="text-[9px] text-white font-mono">${timeStr}</span>
-                                </div>
+                            <div class="photo-item">
+                                <img src="${API_BASE}/static/${photo}" alt="Capture ${timeStr}" loading="lazy">
+                                <div class="photo-timestamp">${timeStr}</div>
                             </div>
                         `;
                     }).join('');
@@ -156,6 +663,7 @@
             } catch (e) { console.error("Erreur photos:", e); }
         }
 
+        // Chart
         async function updateChart() {
             try {
                 const response = await fetch(`${API_BASE}/historique/temperature?limit=15`);
@@ -167,21 +675,26 @@
             } catch (e) { console.error("Erreur Graphique:", e); }
         }
 
+        // Buzzer
         async function controlBuzzer(etat) {
             try {
                 await fetch(`${API_BASE}/action/buzzer/${etat}`, { method: 'POST' });
-            } catch (e) { alert("Erreur communication buzzer"); }
+                updateBuzzerUI(etat);
+            } catch (e) {
+                alert("Erreur de communication avec le buzzer");
+            }
         }
 
-        // Rafraîchissements
-        setInterval(refreshData, 5000);
-        setInterval(refreshPhotos, 5000);
-        setInterval(updateChart, 60000);
-
         // Init
+        updateBuzzerUI(0);
         refreshData();
         refreshPhotos();
         updateChart();
+
+        setInterval(refreshData, 5000);
+        setInterval(refreshPhotos, 5000);
+        setInterval(updateChart, 60000);
     </script>
 </body>
+
 </html>
